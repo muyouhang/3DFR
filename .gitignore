@@ -1,0 +1,8 @@
+# Visual Studio tempory files
+.vs
+[Xx]64/
+*.user
+*.VC.*
+
+# media files
+*.jpg
