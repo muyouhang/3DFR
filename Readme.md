@@ -5,9 +5,9 @@ This project is used for 3D face recognition,
 # 3. Installation
 
 **Dependies**
-> MXNet 1.3.0
-> OpenCV 4.0
-> PCL 1.8.1
+- MXNet     1.3.0
+- OpenCV    4.0
+- PCL       1.8.1
 
 ## Windows
 
