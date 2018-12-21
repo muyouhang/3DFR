@@ -67,7 +67,6 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="mxnet.props" />
-    <Import Project="libfacedetect_x64.props" />
     <Import Project="PCL_R_x64.props" />
     <Import Project="OpenCV4.0_x64_Release.props" />
   </ImportGroup>
@@ -117,7 +116,7 @@
   <ItemGroup>
     <ClCompile Include="BasicFuncation.cpp" />
     <ClCompile Include="CalcNormal.cpp" />
-    <ClCompile Include="FaceDetect.cpp" />
+    <ClCompile Include="FaceLandmark.cpp" />
     <ClCompile Include="FaceRecognition.cpp" />
     <ClCompile Include="FeatureExtractor.cpp" />
     <ClCompile Include="ImageProcess.cpp" />
@@ -127,7 +126,7 @@
   <ItemGroup>
     <ClInclude Include="BasicFuncation.h" />
     <ClInclude Include="CalcNormal.h" />
-    <ClInclude Include="FaceDetect.h" />
+    <ClInclude Include="FaceLandmark.h" />
     <ClInclude Include="FaceRecognition.h" />
     <ClInclude Include="FeatureExtractor.h" />
     <ClInclude Include="ImageProcess.h" />

@@ -30,13 +30,13 @@
     <ClCompile Include="ImageProcess.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="FaceDetect.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="CalcNormal.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="KinectFusion.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FaceLandmark.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,13 +53,13 @@
     <ClInclude Include="ImageProcess.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="FaceDetect.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="CalcNormal.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="KinectFusion.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FaceLandmark.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -26,6 +26,7 @@ public:
 	cv::Mat GetDepth();
 	cv::Mat GetNormal();
 	pcl::PointCloud<pcl::PointXYZ>::Ptr GetPoints();
+	void ShowPoints();
 private:
 	cv::Mat depth_image;
 	cv::Mat normal_image;

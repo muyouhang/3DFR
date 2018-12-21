@@ -1,20 +1,17 @@
 ﻿#include "BasicFuncation.h"
 #include "FeatureExtractor.h"
-#include "FaceDetect.h"
 #include "FaceRecognition.h"
 #include "ImageProcess.h"
 #include "CalcNormal.h"
 #include "KinectFusion.h"
-
+#include "FaceLandmark.h"
 void test_lock3dface();
-boost::shared_ptr<pcl::visualization::PCLVisualizer> simpleVis(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
 int main() {
-	FaceDetect FD;
 	CalcNormal CN;
 	ImageProcess IP;
 	KinectFusion KF;
 	BasicFuncation BF;
-	
+	FaceLandmark FL;
 	KF.Init(cv::Size(256,256));
 
 	std::vector<string> sp;
@@ -46,13 +43,16 @@ int main() {
 		if (flag) {
 			cv::GaussianBlur(infrared, infrared, cv::Size(3, 3), 0, 0);
 			infrared = IP.normalizeInfrared(infrared);
-			std::pair<cv::Rect, cv::Point> infrared_face = FD.detectFaceAndNTP(infrared);
+			std::pair<cv::Rect, cv::Point> infrared_face = FL.detectFaceAndNTP(infrared);
 			roi = cv::Rect(infrared_face.second.x - 128, infrared_face.second.y - 128, 256, 256);
+			if (roi.x <= 0 || roi.y <= 0 || (roi.x + roi.width) >= infrared.cols || (roi.y + roi.height) >= infrared.rows) {
+				std::cout << "face detected error or face landmark detected error" << std::endl;
+				break;
+			}
 			flag = false;
 		}
-
 		cv::Mat cropped_depth = IP.cropDepthFace(depth(roi));
-		depth_map.push_back(cropped_depth.clone());
+		depth_map.push_back(cropped_depth.clone());		
 	}
 
 	for (int i = 0; i < depth_map.size(); i++) {	
@@ -61,7 +61,7 @@ int main() {
 		KF.Update(depth_map.at(i));		
 		std::vector<std::vector<float>> points = KF.GetPoints();		
 		CN.SetPoints(points);
-
+		//CN.ShowPoints();
 		cv::Mat depth_face = CN.GetDepth();
 		cv::transpose(depth_face, depth_face);
 		cv::imwrite("result/depth/" + sp.at(0) + "_" + index + ".jpg", depth_face);
@@ -75,14 +75,9 @@ int main() {
 		//cv::waitKey(33);
 		KF.Reset();
 	}
-	//boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer = simpleVis(CN.GetPoints());
-	//while (!viewer->wasStopped())
-	//{
-	//	viewer->spinOnce(100);
-	//	boost::this_thread::sleep(boost::posix_time::microseconds(100000));
-	//}
 	return 0;
 }
+
 void test_lock3dface() {
 	BasicFuncation BF;
 	FeatureExtractor FE;
@@ -120,31 +115,4 @@ void test_lock3dface() {
 	}
 	cout << "FR = " << double(right_num) / image_num << endl;
 	system("pause");
-}
-//simpleVis函数实现最基本的点云可视化操作，
-boost::shared_ptr<pcl::visualization::PCLVisualizer> simpleVis(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
-{
-	// --------------------------------------------
-	// -----Open 3D viewer and add point cloud-----
-	// --------------------------------------------
-	//创建视窗对象并给标题栏设置一个名称“3D Viewer”并将它设置为boost::shared_ptr智能共享指针，这样可以保证指针在程序中全局使用，而不引起内存错误
-	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
-	//设置视窗的背景色，可以任意设置RGB的颜色，这里是设置为黑色
-	viewer->setBackgroundColor(0, 0, 0);
-	/*这是最重要的一行，我们将点云添加到视窗对象中，并定一个唯一的字符串作为ID 号，利用此字符串保证在其他成员中也能
-	标志引用该点云，多次调用addPointCloud可以实现多个点云的添加，，每调用一次就会创建一个新的ID号，如果想更新一个
-	已经显示的点云，必须先调用removePointCloud（），并提供需要更新的点云ID 号，
-	*******************************************************************************************/
-	viewer->addPointCloud<pcl::PointXYZ>(cloud, "sample cloud");
-	//用于改变显示点云的尺寸，可以利用该方法控制点云在视窗中的显示方法，
-	viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "sample cloud");
-	/*******************************************************************************************************
-	查看复杂的点云，经常让人感到没有方向感，为了保持正确的坐标判断，需要显示坐标系统方向，可以通过使用X（红色）
-	Y（绿色 ）Z （蓝色）圆柱体代表坐标轴的显示方式来解决，圆柱体的大小可以通过scale参数来控制，本例中scale设置为1.0
-
-	******************************************************************************************************/
-	//viewer->addCoordinateSystem(1.0);
-	//通过设置照相机参数使得从默认的角度和方向观察点云
-	//viewer->initCameraParameters();
-	return (viewer);
 }
