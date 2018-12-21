@@ -1,9 +1,9 @@
 #include "FaceLandmark.h"
 FaceLandmark::FaceLandmark()
 {
-	faceDetector.load("lbpcascade_frontalface.xml");
+	faceDetector.load("models/lbpcascade_frontalface.xml");
 	facemark = cv::face::FacemarkLBF::create();
-	facemark->loadModel("lbfmodel.yaml");
+	facemark->loadModel("models/lbfmodel.yaml");
 }
 FaceLandmark::~FaceLandmark()
 {
