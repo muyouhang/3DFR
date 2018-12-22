@@ -12,7 +12,7 @@ using namespace mxnet::cpp;
 class FeatureExtractor
 {
 private:
-	Context ctx = Context::gpu(0);
+	Context ctx = Context::cpu(0);
 	Context ctx_cpu = Context::cpu();
 	map<string, NDArray> args_map;
 	map<string, NDArray> aux_map;

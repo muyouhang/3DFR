@@ -1,15 +1,19 @@
-﻿#include "BasicFuncation.h"
+﻿
+#include "BasicFuncation.h"
 #include "FeatureExtractor.h"
 #include "FaceRecognition.h"
 #include "ImageProcess.h"
-//#include "CalcNormal.h"
+#ifdef _WIN32
+#include "CalcNormal.h"
+#endif
 #include "KinectFusion.h"
 #include "FaceLandmark.h"
 #include <fstream>
 void test_lock3dface();
 void test_kinfu();
 int main() {
-	test_lock3dface();
+	//test_lock3dface();
+	test_kinfu();
 	return 0;
 }
 void test_kinfu() {
@@ -56,38 +60,36 @@ void test_kinfu() {
 		cv::Mat cropped_depth = IP.cropDepthFace(depth(roi));
 		depth_map.push_back(cropped_depth.clone());
 	}
-<<<<<<< HEAD
-	/*CalcNormal CN;
-	for (int i = 0; i < depth_map.size(); i++) {	
-=======
-	//CalcNormal CN;
+
+	
+#ifdef _WIN32
+	CalcNormal CN;
+#endif
 	for (int i = 0; i < depth_map.size(); i++) {
->>>>>>> refs/remotes/origin/master
+
 		char index[2];		sprintf(index, "%02d", i);
 
 		KF.Update(depth_map.at(i));
-		//std::vector<std::vector<float>> points = KF.GetPoints();
-		//CN.SetPoints(points);
-		////CN.ShowPoints();
-		//cv::Mat depth_face = CN.GetDepth();
-		//cv::transpose(depth_face, depth_face);
-		//cv::imwrite("result/depth/" + sp.at(0) + "_" + index + ".jpg", depth_face);
+#ifdef _WIN32
+		std::vector<std::vector<float>> points = KF.GetPoints();
+		CN.SetPoints(points);
+		//CN.ShowPoints();
+		cv::Mat depth_face = CN.GetDepth();
+		cv::transpose(depth_face, depth_face);
+		cv::imwrite("result/depth/" + sp.at(0) + "_" + index + ".jpg", depth_face);
 
-		//cv::Mat normal_face = CN.GetNormal();
-		//cv::transpose(normal_face, normal_face);
-		//cv::imwrite("result/normal/" + sp.at(0) + "_" + index + ".jpg", normal_face);
+		cv::Mat normal_face = CN.GetNormal();
+		cv::transpose(normal_face, normal_face);
+		cv::imwrite("result/normal/" + sp.at(0) + "_" + index + ".jpg", normal_face);
 
-		//cv::imshow("depth", depth_face);
-		//cv::imshow("normal", normal_face);
+		cv::imshow("depth", depth_face);
+		cv::imshow("normal", normal_face);
+#endif
 		cv::imshow("render",KF.GetRender());
 		cv::waitKey(33);
 		//KF.Reset();
-<<<<<<< HEAD
-	}*/
-	return 0;
-=======
+
 	}
->>>>>>> refs/remotes/origin/master
 }
 #ifdef _WIN32
 void test_lock3dface() {

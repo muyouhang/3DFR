@@ -85,10 +85,10 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="win_props\BH\mxnet.props" />
-    <Import Project="win_props\BH\OpenCV4.0_x64_Release.props" />
-    <Import Project="win_props\BH\PCL_R_x64.props" />
-    <Import Project="win_props\BH\Led3DFR.props" />
+    <Import Project="win_props\BHHYY\mxnet.props" />
+    <Import Project="win_props\BHHYY\OpenCV4.0_x64_Release.props" />
+    <Import Project="win_props\BHHYY\PCL_R_x64.props" />
+    <Import Project="win_props\BHHYY\Led3DFR.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
