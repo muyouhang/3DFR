@@ -21,7 +21,7 @@ double FaceRecognition::module(const std::vector<double> v){
      for (std::vector<double>::size_type i = 0; i != v.size(); ++i){
          ret += v[i] * v[i];
      }
-     return sqrt(ret);
+     return std::sqrt(ret);
 }
 // º–Ω«”‡œ“
 double FaceRecognition::cosine(const std::vector<double> v1, const std::vector<double> v2){

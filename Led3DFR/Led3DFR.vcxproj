@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="examples\main.cpp" />
+    <ClCompile Include="examples\test_kinfu.cpp" />
     <ClCompile Include="src\BasicFuncation.cpp" />
     <ClCompile Include="src\CalcNormal.cpp" />
     <ClCompile Include="src\FaceLandmark.cpp" />

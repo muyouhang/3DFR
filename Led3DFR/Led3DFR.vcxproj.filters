@@ -42,7 +42,7 @@
     <ClCompile Include="src\KinectFusion.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="examples\main.cpp">
+    <ClCompile Include="examples\test_kinfu.cpp">
       <Filter>examples</Filter>
     </ClCompile>
   </ItemGroup>

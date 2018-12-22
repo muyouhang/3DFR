@@ -10,6 +10,7 @@ BasicFuncation::BasicFuncation()
 BasicFuncation::~BasicFuncation()
 {
 }
+#ifdef _WIN32
 vector<string> BasicFuncation::listDir(string path) {
 	vector<string> dirpath;
 	//нд╪Ч╬Д╠З    
@@ -86,6 +87,7 @@ void BasicFuncation::GetAllFormatFiles(string path, vector<string>& files, strin
 		_findclose(hFile);
 	}
 }
+#endif
 int BasicFuncation::str2int(string str) {
 	stringstream ss;
 	int num;
