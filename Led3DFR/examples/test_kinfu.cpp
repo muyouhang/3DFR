@@ -7,14 +7,17 @@
 #include "FaceLandmark.h"
 #include <fstream>
 void test_lock3dface();
+void test_kinfu();
 int main() {
 	test_lock3dface();
 	return 0;
+}
+void test_kinfu() {
 	ImageProcess IP;
 	KinectFusion KF;
 	BasicFuncation BF;
 	FaceLandmark FL;
-	KF.Init(cv::Size(256,256));
+	KF.Init(cv::Size(256, 256));
 
 	std::vector<string> sp;
 	std::vector<cv::Mat> depth_map;
@@ -22,8 +25,8 @@ int main() {
 	string root_dir = "data/";
 	string depth_raw_name = "001_Kinect_FE_1DEPTH.RAW";
 	string infrared_raw_name = "001_Kinect_FE_1INFRARED.RAW";
-	
-	IP.openDepthVideo(root_dir+ depth_raw_name);
+
+	IP.openDepthVideo(root_dir + depth_raw_name);
 	IP.openInfraredVideo(root_dir + infrared_raw_name);
 
 	sp = BF.split(depth_raw_name, ".");
@@ -34,7 +37,7 @@ int main() {
 
 	while (IP.readDepthImage() && IP.readInfraredImage()) {
 
-		if (count++ >58) {		break;		}
+		if (count++ >58) { break; }
 
 		cv::Mat depth = IP.getDepthImage();
 		cv::Mat infrared = IP.getInfraredImage();
@@ -51,31 +54,40 @@ int main() {
 			flag = false;
 		}
 		cv::Mat cropped_depth = IP.cropDepthFace(depth(roi));
-		depth_map.push_back(cropped_depth.clone());		
+		depth_map.push_back(cropped_depth.clone());
 	}
+<<<<<<< HEAD
 	/*CalcNormal CN;
 	for (int i = 0; i < depth_map.size(); i++) {	
+=======
+	//CalcNormal CN;
+	for (int i = 0; i < depth_map.size(); i++) {
+>>>>>>> refs/remotes/origin/master
 		char index[2];		sprintf(index, "%02d", i);
 
-		KF.Update(depth_map.at(i));		
-		std::vector<std::vector<float>> points = KF.GetPoints();		
-		CN.SetPoints(points);
-		//CN.ShowPoints();
-		cv::Mat depth_face = CN.GetDepth();
-		cv::transpose(depth_face, depth_face);
-		cv::imwrite("result/depth/" + sp.at(0) + "_" + index + ".jpg", depth_face);
+		KF.Update(depth_map.at(i));
+		//std::vector<std::vector<float>> points = KF.GetPoints();
+		//CN.SetPoints(points);
+		////CN.ShowPoints();
+		//cv::Mat depth_face = CN.GetDepth();
+		//cv::transpose(depth_face, depth_face);
+		//cv::imwrite("result/depth/" + sp.at(0) + "_" + index + ".jpg", depth_face);
 
-		cv::Mat normal_face = CN.GetNormal();
-		cv::transpose(normal_face, normal_face);
-		cv::imwrite("result/normal/" + sp.at(0) + "_" + index + ".jpg", normal_face);
+		//cv::Mat normal_face = CN.GetNormal();
+		//cv::transpose(normal_face, normal_face);
+		//cv::imwrite("result/normal/" + sp.at(0) + "_" + index + ".jpg", normal_face);
 
-		cv::imshow("depth",depth_face);
-		cv::imshow("normal", normal_face);
-		//cv::imshow("render",KF.GetRender());
+		//cv::imshow("depth", depth_face);
+		//cv::imshow("normal", normal_face);
+		cv::imshow("render",KF.GetRender());
 		cv::waitKey(33);
 		//KF.Reset();
+<<<<<<< HEAD
 	}*/
 	return 0;
+=======
+	}
+>>>>>>> refs/remotes/origin/master
 }
 #ifdef _WIN32
 void test_lock3dface() {
