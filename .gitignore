@@ -6,5 +6,5 @@
 *.VC.*
 
 # media files
-result
-build
+result/
+build/
