@@ -1,6 +1,7 @@
 # Visual Studio tempory files
 .vs
 [Xx]64/
+[Xx]build/
 *.user
 *.VC.*
 
