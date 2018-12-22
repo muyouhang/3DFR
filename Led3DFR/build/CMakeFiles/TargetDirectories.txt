@@ -1,0 +1,3 @@
+/data/irip_rpt/3DFR/Led3DFR/build/CMakeFiles/edit_cache.dir
+/data/irip_rpt/3DFR/Led3DFR/build/CMakeFiles/rebuild_cache.dir
+/data/irip_rpt/3DFR/Led3DFR/build/CMakeFiles/test_kinfu.dir

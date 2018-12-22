@@ -2,7 +2,7 @@
 #include "FeatureExtractor.h"
 #include "FaceRecognition.h"
 #include "ImageProcess.h"
-#include "CalcNormal.h"
+//#include "CalcNormal.h"
 #include "KinectFusion.h"
 #include "FaceLandmark.h"
 #include <fstream>
@@ -53,7 +53,7 @@ int main() {
 		cv::Mat cropped_depth = IP.cropDepthFace(depth(roi));
 		depth_map.push_back(cropped_depth.clone());		
 	}
-	CalcNormal CN;
+	/*CalcNormal CN;
 	for (int i = 0; i < depth_map.size(); i++) {	
 		char index[2];		sprintf(index, "%02d", i);
 
@@ -74,7 +74,7 @@ int main() {
 		//cv::imshow("render",KF.GetRender());
 		cv::waitKey(33);
 		//KF.Reset();
-	}
+	}*/
 	return 0;
 }
 #ifdef _WIN32
