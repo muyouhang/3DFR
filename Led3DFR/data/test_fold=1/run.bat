@@ -1,0 +1,2 @@
+python generate_image_list.py normal
+pause

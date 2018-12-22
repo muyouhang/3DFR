@@ -74,6 +74,7 @@ std::vector<double> FeatureExtractor::Extract(string image_name) {
 	std::vector<double> feature;
 	for (int i = 0; i < array.Size(); i++) {
 		feature.push_back(array.At(0,i));
+		//std::cout << array.At(0, i) << std::endl;
 	}
 	return feature;
 }
