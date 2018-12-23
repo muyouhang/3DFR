@@ -3,9 +3,7 @@
 #include "FeatureExtractor.h"
 #include "FaceRecognition.h"
 #include "ImageProcess.h"
-#ifdef _WIN32
 #include "CalcNormal.h"
-#endif
 #include "KinectFusion.h"
 #include "FaceLandmark.h"
 #include <fstream>
@@ -18,10 +16,8 @@ int main() {
 }
 void test_kinfu() {
 	ImageProcess IP;
-	KinectFusion KF;
 	BasicFuncation BF;
 	FaceLandmark FL;
-	KF.Init(cv::Size(256, 256));
 
 	std::vector<string> sp;
 	std::vector<cv::Mat> depth_map;
@@ -60,36 +56,46 @@ void test_kinfu() {
 		cv::Mat cropped_depth = IP.cropDepthFace(depth(roi));
 		depth_map.push_back(cropped_depth.clone());
 	}
-
-	
-#ifdef _WIN32
 	CalcNormal CN;
-#endif
+	KinectFusion KF; KF.Init(cv::Size(256, 256));
 	for (int i = 0; i < depth_map.size(); i++) {
-
 		char index[2];		sprintf(index, "%02d", i);
 
+		KinectFusion KF_temp;	KF_temp.Init(cv::Size(256, 256));
+		KF_temp.Update(depth_map.at(i));
+		std::vector<std::vector<float>> points_temp = KF_temp.GetPoints();
+		CalcNormal CN_temp;		CN.SetPoints(points_temp);
+		cv::Mat depth_face_temp = CN.GetDepth();		cv::transpose(depth_face_temp, depth_face_temp);
+		cv::imwrite("result/depth/" + sp.at(0) + "_" + index + ".jpg", depth_face_temp);
+
+		cv::Mat normal_face_temp = CN.GetNormal();	cv::transpose(normal_face_temp, normal_face_temp);
+		cv::imwrite("result/normal/" + sp.at(0) + "_" + index + ".jpg", normal_face_temp);
+
 		KF.Update(depth_map.at(i));
-#ifdef _WIN32
 		std::vector<std::vector<float>> points = KF.GetPoints();
 		CN.SetPoints(points);
-		//CN.ShowPoints();
 		cv::Mat depth_face = CN.GetDepth();
 		cv::transpose(depth_face, depth_face);
-		cv::imwrite("result/depth/" + sp.at(0) + "_" + index + ".jpg", depth_face);
+		cv::imwrite("result/kinfu_depth/" + sp.at(0) + "_" + index + ".jpg", depth_face);
 
 		cv::Mat normal_face = CN.GetNormal();
 		cv::transpose(normal_face, normal_face);
-		cv::imwrite("result/normal/" + sp.at(0) + "_" + index + ".jpg", normal_face);
+		cv::imwrite("result/kinfu_normal/" + sp.at(0) + "_" + index + ".jpg", normal_face);
 
 		cv::imshow("depth", depth_face);
 		cv::imshow("normal", normal_face);
-#endif
 		cv::imshow("render",KF.GetRender());
 		cv::waitKey(33);
 		//KF.Reset();
-
 	}
+	//KinectFusion KF;	KF.Init(cv::Size(256, 256));
+	//for (int i = 0; i < depth_map.size(); i++) {
+	//	KF.Update(depth_map.at(i));
+
+	//	cv::imshow("render",KF.GetRender());
+	//	cv::waitKey(33);
+	//	//KF.Reset();
+	//}
 }
 #ifdef _WIN32
 void test_lock3dface() {
@@ -131,6 +137,7 @@ void test_lock3dface() {
 	system("pause");
 }
 #else
+
 void test_lock3dface() {
 
 	FeatureExtractor FE;
