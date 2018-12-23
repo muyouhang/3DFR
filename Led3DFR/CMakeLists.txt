@@ -15,7 +15,7 @@ SET(OpenCV_DIR /data/irip_rpt/3rdparty/opencv-4.0.0/build)
 find_package(OpenCV 4.0 REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 link_directories(${OpenCV_LIBRARY_DIRS})
-
+message(STATUS "OpenCV_LIBRARY_DIRS is ${OpenCV_LIBRARY_DIRS} ")
 include_directories(/data/irip_rpt/3rdparty/mxnet/include)
 link_directories(/data/irip_rpt/3rdparty/mxnet/lib)
 

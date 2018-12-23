@@ -12,7 +12,7 @@
 void test_lock3dface();
 void test_kinfu();
 int main() {
-	//test_lock3dface();
+	test_lock3dface();
 	test_kinfu();
 	return 0;
 }
