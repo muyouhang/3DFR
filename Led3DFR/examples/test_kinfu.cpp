@@ -82,10 +82,10 @@ void test_kinfu() {
 		cv::transpose(normal_face, normal_face);
 		cv::imwrite("result/kinfu_normal/" + sp.at(0) + "_" + index + ".jpg", normal_face);
 
-		cv::imshow("depth", depth_face);
-		cv::imshow("normal", normal_face);
-		cv::imshow("render",KF.GetRender());
-		cv::waitKey(33);
+		//cv::imshow("depth", depth_face);
+		//cv::imshow("normal", normal_face);
+		//cv::imshow("render",KF.GetRender());
+		//cv::waitKey(33);
 		//KF.Reset();
 	}
 	//KinectFusion KF;	KF.Init(cv::Size(256, 256));

@@ -63,14 +63,14 @@ void CalcNormal::upsample(float search_radius, float upsample_radius, float step
 
 void CalcNormal::convertPointXYZ2Depth() {
 	double minx = this->points_cloud->points[0].x, maxx = minx, miny = this->points_cloud->points[0].y, maxy = miny, minz = this->points_cloud->points[0].z, maxz = minz;
-	for (vector<pcl::PointXYZ>::iterator it = this->points_cloud->begin(); it != this->points_cloud->end(); it++)
+	for(int i=0;i<this->points_cloud->points.size();i++)
 	{
-		minx = min(minx, (double)it->x);
-		maxx = max(maxx, (double)it->x);
-		miny = min(miny, (double)it->y);
-		maxy = max(maxy, (double)it->y);
-		minz = min(minz, (double)it->z);
-		maxz = max(maxz, (double)it->z);
+		minx = min(minx, (double)this->points_cloud->points.at(i).x);
+		maxx = max(maxx, (double)this->points_cloud->points.at(i).x);
+		miny = min(miny, (double)this->points_cloud->points.at(i).y);
+		maxy = max(maxy, (double)this->points_cloud->points.at(i).y);
+		minz = min(minz, (double)this->points_cloud->points.at(i).z);
+		maxz = max(maxz, (double)this->points_cloud->points.at(i).z);
 	}
 	std::cout << maxx - minx << "," << maxy - miny << std::endl;
 	cv::Mat M((int)(maxx - minx + 1), (int)(maxy - miny + 1), CV_8UC1);
@@ -81,14 +81,14 @@ void CalcNormal::convertPointXYZ2Depth() {
 			M.at<uchar>(i, j) = 0;
 		}
 	}
-	for (vector<pcl::PointXYZ>::iterator it = this->points_cloud->begin(); it != this->points_cloud->end(); ++it)
+	for(int i=0;i<this->points_cloud->points.size();i++)
 	{
-		int x = (int)(it->x - minx);
-		int y = (int)(it->y - miny);
-		double pixel = (it->z - minz) / (maxz - minz) * 255;
+		int x = (int)(this->points_cloud->points.at(i).x - minx);
+		int y = (int)(this->points_cloud->points.at(i).y - miny);
+		double pixel = (this->points_cloud->points.at(i).z - minz) / (maxz - minz) * 255;
 		if (pixel > M.at<uchar>(x, y))
 		{
-			M.at<uchar>(x, y) = (it->z - minz) / (maxz - minz) * 255;
+			M.at<uchar>(x, y) = (this->points_cloud->points.at(i).z - minz) / (maxz - minz) * 255;
 		}
 
 	}
@@ -109,14 +109,15 @@ void CalcNormal::convertPointXYZ2Normal() {
 
 
 	double minx = this->points_cloud->points[0].x, maxx = minx, miny = this->points_cloud->points[0].y, maxy = miny, minz = this->points_cloud->points[0].z, maxz = minz;
-	for (vector<pcl::PointXYZ>::iterator it = this->points_cloud->begin(); it != this->points_cloud->end(); it++)
+	//for (vector<pcl::PointXYZ>::iterator it = this->points_cloud->begin(); it != this->points_cloud->end(); it++)
+	for(int i=0;i<this->points_cloud->points.size();i++)
 	{
-		minx = min(minx, (double)it->x);
-		maxx = max(maxx, (double)it->x);
-		miny = min(miny, (double)it->y);
-		maxy = max(maxy, (double)it->y);
-		minz = min(minz, (double)it->z);
-		maxz = max(maxz, (double)it->z);
+		minx = min(minx, (double)this->points_cloud->points.at(i).x);
+		maxx = max(maxx, (double)this->points_cloud->points.at(i).x);
+		miny = min(miny, (double)this->points_cloud->points.at(i).y);
+		maxy = max(maxy, (double)this->points_cloud->points.at(i).y);
+		minz = min(minz, (double)this->points_cloud->points.at(i).z);
+		maxz = max(maxz, (double)this->points_cloud->points.at(i).z);
 	}
 	cv::Mat normal_image = cv::Mat::zeros((int)(maxx - minx + 1), (int)(maxy - miny + 1), CV_8UC3);
 
