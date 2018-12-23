@@ -13,8 +13,8 @@
 #include <opencv2/opencv.hpp>
 #include <pcl/search/kdtree.h>
 #include <pcl/features/normal_3d.h>
-#include <pcl/visualization/cloud_viewer.h>
-#include <pcl/visualization/pcl_visualizer.h>
+//#include <pcl/visualization/cloud_viewer.h>
+//#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 
 using namespace std;
@@ -26,7 +26,7 @@ public:
 	cv::Mat GetDepth();
 	cv::Mat GetNormal();
 	pcl::PointCloud<pcl::PointXYZ>::Ptr GetPoints();
-	void ShowPoints();
+	//void ShowPoints();
 private:
 	cv::Mat depth_image;
 	cv::Mat normal_image;
