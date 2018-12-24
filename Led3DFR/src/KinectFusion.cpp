@@ -34,7 +34,7 @@ void KinectFusion::Init(cv::Size frame_size) {
 	kf = KinFu::create(params);
 
 }
-void KinectFusion::Update(cv::Mat depth_image) {
+bool KinectFusion::Update(cv::Mat depth_image) {
 
 	cv::UMat frame;
 	depth_image.copyTo(frame);
@@ -51,7 +51,9 @@ void KinectFusion::Update(cv::Mat depth_image) {
 	{
 		kf->reset();
 		std::cout << "reset" << std::endl;
+		return false;
 	}
+	return true;
 }
 void KinectFusion::Reset() {
 	kf->reset();

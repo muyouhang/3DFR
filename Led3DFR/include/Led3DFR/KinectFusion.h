@@ -17,7 +17,7 @@ public:
 	KinectFusion();
 	~KinectFusion();
 	void Init(cv::Size frame_size);
-	void Update(cv::Mat depth_image);
+	bool Update(cv::Mat depth_image);
 	void Reset();
 	std::vector<std::vector<float>> GetPoints();
 	cv::Mat GetRender();

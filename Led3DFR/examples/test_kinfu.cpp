@@ -65,8 +65,8 @@ void process_lock3dface() {
 
 			KinectFusion KF_temp;
 			KF_temp.Init(cv::Size(256, 256));
-			KF_temp.Update(cropped_depth);
-			KF.Update(cropped_depth);
+			if(!KF_temp.Update(cropped_depth)) continue;
+			if(!KF.Update(cropped_depth)) continue;
 
 			std::vector<std::vector<float>> points = KF.GetPoints();
 			std::vector<std::vector<float>> points_temp = KF_temp.GetPoints();
