@@ -72,8 +72,8 @@ void CalcNormal::convertPointXYZ2Depth() {
 		minz = min(minz, (double)this->points_cloud->points.at(i).z);
 		maxz = max(maxz, (double)this->points_cloud->points.at(i).z);
 	}
-	std::cout << maxx - minx << "," << maxy - miny << std::endl;
 	cv::Mat M((int)(maxx - minx + 1), (int)(maxy - miny + 1), CV_8UC1);
+#pragma omp parallel for
 	for (int i = 0; i<M.rows; i++)
 	{
 		for (int j = 0; j<M.cols; j++)
@@ -81,6 +81,7 @@ void CalcNormal::convertPointXYZ2Depth() {
 			M.at<uchar>(i, j) = 0;
 		}
 	}
+#pragma omp parallel for
 	for(int i=0;i<this->points_cloud->points.size();i++)
 	{
 		int x = (int)(this->points_cloud->points.at(i).x - minx);
@@ -120,8 +121,8 @@ void CalcNormal::convertPointXYZ2Normal() {
 		maxz = max(maxz, (double)this->points_cloud->points.at(i).z);
 	}
 	cv::Mat normal_image = cv::Mat::zeros((int)(maxx - minx + 1), (int)(maxy - miny + 1), CV_8UC3);
-
-	for (unsigned int i = 0; i < pcNormal->size(); ++i)
+#pragma omp parallel for
+	for (int i = 0; i < pcNormal->size(); ++i)
 	{
 		//Í³Ò»normal³¯Ïò£¬nz>0
 		if (pcNormal->points[i].normal_z < 0)

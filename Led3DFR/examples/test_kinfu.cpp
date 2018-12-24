@@ -7,12 +7,105 @@
 #include "KinectFusion.h"
 #include "FaceLandmark.h"
 #include <fstream>
+#include <direct.h>
+#include <future>
+#include <chrono>
 void test_lock3dface();
 void test_kinfu();
+void process_lock3dface();
 int main() {
-	test_lock3dface();
-	test_kinfu();
+	//test_lock3dface();
+	//test_kinfu();
+	process_lock3dface();
 	return 0;
+}
+void process_lock3dface() {
+	BasicFuncation BF;
+	ImageProcess IP;
+	KinectFusion KF; KF.Init(cv::Size(256, 256));
+
+	ifstream depth_data("E:/Dataset/lock3dface/DATA/kinect_all.dat");
+	ifstream depth_label("E:/Dataset/lock3dface/DATA/kinect_all.name");
+
+	string line;
+	string label;
+	string save_path = "E:/Dataset/Lock3DFace_/";
+	cv::Mat mask(cv::Size(256, 256), CV_16UC1);
+	while (getline(depth_label, label)) {
+		std::cout << label << std::endl;
+		std::vector<string> sp = BF.split(label,",");
+		if (_access((save_path + "depth/" + sp.at(0)).data(), 0) == -1) {
+			_mkdir((save_path + "depth/"+sp.at(0).data()).data());
+		}
+		if (_access((save_path + "depth_kinfu/" + sp.at(0)).data(), 0) == -1) {
+			_mkdir((save_path + "depth_kinfu/" + sp.at(0).data()).data());
+		}
+		if (_access((save_path + "normal/" + sp.at(0)).data(), 0) == -1) {
+			_mkdir((save_path + "normal/" + sp.at(0).data()).data());
+		}
+		if (_access((save_path + "normal_kinfu/" + sp.at(0)).data(), 0) == -1) {
+			_mkdir((save_path + "normal_kinfu/" + sp.at(0).data()).data());
+		}
+		for (int i = 0; i < BF.str2int(sp.at(1)); i++) {
+			char index[2];		sprintf(index, "%02d", i);
+			getline(depth_data, line);
+			std::vector<string> raw_data = BF.split(line, " ");
+			cv::Mat depth_image(cv::Size(180, 180), CV_16UC1);
+			unsigned short *p;
+			for (int i = 0; i < 180; i++)
+			{
+				p = depth_image.ptr<uint16_t >(i);
+				for (int j = 0; j < 180; ++j) {
+					p[j] = BF.str2int(raw_data.at(i * 180 + j));
+				}
+			}
+			cv::transpose(depth_image, depth_image);
+			depth_image.copyTo(mask(cv::Rect(38, 38, 180, 180)));
+			cv::Mat cropped_depth = IP.cropDepthFace(mask);
+
+			KinectFusion KF_temp;
+			KF_temp.Init(cv::Size(256, 256));
+			KF_temp.Update(cropped_depth);
+			KF.Update(cropped_depth);
+
+			std::vector<std::vector<float>> points = KF.GetPoints();
+			std::vector<std::vector<float>> points_temp = KF_temp.GetPoints();
+			CalcNormal CN_temp;
+			CalcNormal CN;
+
+			if (points.size() < 100) {				continue;			}
+			else {				CN.SetPoints(points);			}
+
+			if (points_temp.size() < 100) {				continue;			}
+			else {				CN_temp.SetPoints(points_temp);			}
+
+			std::future<void> t_depth = async(std::launch::async, [&]() {
+				cv::Mat depth_face_temp = CN_temp.GetDepth();
+				cv::transpose(depth_face_temp, depth_face_temp);
+				cv::imwrite(save_path + "depth/" + sp.at(0) + "/" + index + ".jpg", IP.resize(depth_face_temp, cv::Size(128, 128)));
+			});
+			std::future<void> t_normal = async(std::launch::async, [&]() {
+				cv::Mat normal_face_temp = CN_temp.GetNormal();
+				cv::transpose(normal_face_temp, normal_face_temp);
+				cv::imwrite(save_path + "normal/" + sp.at(0) + "/" + index + ".jpg", IP.resize(normal_face_temp, cv::Size(128, 128)));
+			});
+			std::future<void> t_depth_kinfu = async(std::launch::async, [&]() {
+				cv::Mat depth_face = CN.GetDepth();
+				cv::transpose(depth_face, depth_face);
+				cv::imwrite(save_path + "depth_kinfu/" + sp.at(0) + "/" + index + ".jpg", IP.resize(depth_face, cv::Size(128, 128)));
+			});
+			std::future<void> t_normal_kinfu = async(std::launch::async, [&]() {
+				cv::Mat normal_face = CN.GetNormal();
+				cv::transpose(normal_face, normal_face);
+				cv::imwrite(save_path + "normal_kinfu/" + sp.at(0) + "/" + index + ".jpg", IP.resize(normal_face, cv::Size(128, 128)));
+			});
+
+			t_depth.wait();
+			t_normal.wait();
+			t_depth_kinfu.wait();
+			t_normal_kinfu.wait();
+		}
+	}
 }
 void test_kinfu() {
 	ImageProcess IP;
@@ -34,7 +127,6 @@ void test_kinfu() {
 	bool flag = true;
 	cv::Rect roi;
 	int count = 0;
-
 	while (IP.readDepthImage() && IP.readInfraredImage()) {
 
 		if (count++ >58) { break; }

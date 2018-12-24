@@ -32,5 +32,6 @@ public:
 	cv::Mat normalizeInfrared(cv::Mat image);
 
 	cv::Mat cropDepthFace(cv::Mat depth_face);
+	cv::Mat ImageProcess::resize(cv::Mat inputImage, cv::Size size);
 };
 

@@ -160,7 +160,7 @@ cv::Mat ImageProcess::cropDepthFace(cv::Mat depth_face) {
 		p = depth_face.ptr<uint16_t >(i);//获取每行首地址
 		for (int j = 0; j < nCols; ++j)
 		{
-			if ((ntp.x-i)*(ntp.x - i) + (ntp.y - j)*(ntp.y - j) + (p[j] - ntp_value)*(p[j]-ntp_value) > 80 * 80) {
+			if ((ntp.x-i)*(ntp.x - i) + (ntp.y - j)*(ntp.y - j) + (p[j] - ntp_value)*(p[j]-ntp_value) > 70 * 70) {
 				p[j] = 0;
 			}
 			else {
@@ -171,4 +171,22 @@ cv::Mat ImageProcess::cropDepthFace(cv::Mat depth_face) {
 		}
 	}
 	return depth_face;
+}
+cv::Mat ImageProcess::resize(cv::Mat inputImage, cv::Size size) {
+	int s;
+	if (inputImage.rows > inputImage.cols) {
+		s = inputImage.rows;
+	}
+	else {
+		s = inputImage.cols;
+	}
+	cv::Mat image_temp_ep(s, s, CV_8UC3, cv::Scalar(0, 0, 0));
+	if (inputImage.channels() == 1) {
+		cvtColor(image_temp_ep, image_temp_ep, cv::COLOR_BGR2GRAY);
+	}
+	cv::Mat image_temp_ep_roi = image_temp_ep(cv::Rect((s - inputImage.cols) / 2, (s - inputImage.rows) / 2, inputImage.cols, inputImage.rows));
+	cv::Mat dstNormImg;
+	addWeighted(image_temp_ep_roi, 0., inputImage, 1.0, 0., image_temp_ep_roi);
+	cv::resize(image_temp_ep, dstNormImg, size, 0, 0, 1);    //大小归一化
+	return dstNormImg;
 }

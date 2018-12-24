@@ -5,6 +5,8 @@
 *.user
 *.VC.*
 
-# media files
-result/
-build/
+# folder
+result
+build
+test_fold=1
+bin

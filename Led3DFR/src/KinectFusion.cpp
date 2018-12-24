@@ -63,7 +63,6 @@ std::vector<std::vector<float>> KinectFusion::GetPoints() {
 	kf->getCloud(u_points, u_normals);
 	cv::Mat_<cv::Vec4f> points = u_points.getMat(cv::ACCESS_RW);
 	cv::Mat_<cv::Vec4f> normals = u_normals.getMat(cv::ACCESS_RW);
-	cout << points.cols << "," << points.rows << endl;
 	for (int r = 0; r < points.rows; r++) {
 		point_cloud.push_back(std::vector<float>{
 			points.ptr<cv::Vec4f>(0, 0)[r][0],
