@@ -11,19 +11,19 @@ cv::Mat CalcNormal::GetNormal() {
 	convertPointXYZ2Normal();
 	return normal_image;
 }
-pcl::PointCloud<pcl::PointXYZ>::Ptr CalcNormal::GetPoints() {
+pcl::PointCloud<pcl::PointXYZ> CalcNormal::GetPoints() {
 	return this->points_cloud;
 }
 void CalcNormal::convertPoints2PointXYZ() {
-	pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
+	//pcl::PointCloud<pcl::PointXYZ> point_cloud_ptr;
+	this->points_cloud.points.clear();
 	for (int p = 0; p < points.size(); p++) {
 		pcl::PointXYZ point;
 		point.x = points.at(p).at(0) * 500;
 		point.y = points.at(p).at(1) * 500;
 		point.z = points.at(p).at(2) * 500;
-		point_cloud_ptr->points.push_back(point);
+		this->points_cloud.points.push_back(point);
 	}
-	this->points_cloud = point_cloud_ptr;
 	this->upsample(5, 3, 1.5);
 	//this->deOutlier(30, 0.0001);
 
@@ -31,17 +31,17 @@ void CalcNormal::convertPoints2PointXYZ() {
 void CalcNormal::deOutlier(int neighbour, double dev)
 {
 	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-	sor.setInputCloud(this->points_cloud);
+	sor.setInputCloud(this->points_cloud.makeShared());
 	sor.setMeanK(neighbour);
 	sor.setStddevMulThresh(dev);
-	sor.filter(*this->points_cloud);
+	sor.filter(this->points_cloud);
 }
 void CalcNormal::upsample(float search_radius, float upsample_radius, float step) {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr smoothedCloud(new pcl::PointCloud<pcl::PointXYZ>);
 	// Smoothing object (we choose what point types we want as input and output).
 	pcl::MovingLeastSquares<pcl::PointXYZ, pcl::PointXYZ> filter;
-	filter.setInputCloud(points_cloud);
+	filter.setInputCloud(points_cloud.makeShared());
 	// ÉèÖÃËÑË÷ÁÚÓòµÄ°ë¾¶
 	filter.setSearchRadius(search_radius);
 	// If true, the surface and normal are approximated using a polynomial estimation
@@ -58,19 +58,19 @@ void CalcNormal::upsample(float search_radius, float upsample_radius, float step
 	filter.setUpsamplingStepSize(step);
 
 	filter.process(*smoothedCloud);
-	points_cloud = smoothedCloud;
+	points_cloud = *smoothedCloud;
 }
 
 void CalcNormal::convertPointXYZ2Depth() {
-	double minx = this->points_cloud->points[0].x, maxx = minx, miny = this->points_cloud->points[0].y, maxy = miny, minz = this->points_cloud->points[0].z, maxz = minz;
-	for(int i=0;i<this->points_cloud->points.size();i++)
+	double minx = this->points_cloud.points[0].x, maxx = minx, miny = this->points_cloud.points[0].y, maxy = miny, minz = this->points_cloud.points[0].z, maxz = minz;
+	for(int i=0;i<this->points_cloud.points.size();i++)
 	{
-		minx = min(minx, (double)this->points_cloud->points.at(i).x);
-		maxx = max(maxx, (double)this->points_cloud->points.at(i).x);
-		miny = min(miny, (double)this->points_cloud->points.at(i).y);
-		maxy = max(maxy, (double)this->points_cloud->points.at(i).y);
-		minz = min(minz, (double)this->points_cloud->points.at(i).z);
-		maxz = max(maxz, (double)this->points_cloud->points.at(i).z);
+		minx = min(minx, (double)this->points_cloud.points.at(i).x);
+		maxx = max(maxx, (double)this->points_cloud.points.at(i).x);
+		miny = min(miny, (double)this->points_cloud.points.at(i).y);
+		maxy = max(maxy, (double)this->points_cloud.points.at(i).y);
+		minz = min(minz, (double)this->points_cloud.points.at(i).z);
+		maxz = max(maxz, (double)this->points_cloud.points.at(i).z);
 	}
 	cv::Mat M((int)(maxx - minx + 1), (int)(maxy - miny + 1), CV_8UC1);
 #pragma omp parallel for
@@ -82,14 +82,14 @@ void CalcNormal::convertPointXYZ2Depth() {
 		}
 	}
 #pragma omp parallel for
-	for(int i=0;i<this->points_cloud->points.size();i++)
+	for(int i=0;i<this->points_cloud.points.size();i++)
 	{
-		int x = (int)(this->points_cloud->points.at(i).x - minx);
-		int y = (int)(this->points_cloud->points.at(i).y - miny);
-		double pixel = (this->points_cloud->points.at(i).z - minz) / (maxz - minz) * 255;
+		int x = (int)(this->points_cloud.points.at(i).x - minx);
+		int y = (int)(this->points_cloud.points.at(i).y - miny);
+		double pixel = (this->points_cloud.points.at(i).z - minz) / (maxz - minz) * 255;
 		if (pixel > M.at<uchar>(x, y))
 		{
-			M.at<uchar>(x, y) = (this->points_cloud->points.at(i).z - minz) / (maxz - minz) * 255;
+			M.at<uchar>(x, y) = (this->points_cloud.points.at(i).z - minz) / (maxz - minz) * 255;
 		}
 
 	}
@@ -103,22 +103,22 @@ void CalcNormal::convertPointXYZ2Normal() {
 	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
 
 	//tree->setInputCloud(this->points_cloud);
-	ne.setInputCloud(this->points_cloud);
+	ne.setInputCloud(this->points_cloud.makeShared());
 	ne.setSearchMethod(tree);
 	ne.setKSearch(20);
 	ne.compute(*pcNormal);
 
 
-	double minx = this->points_cloud->points[0].x, maxx = minx, miny = this->points_cloud->points[0].y, maxy = miny, minz = this->points_cloud->points[0].z, maxz = minz;
+	double minx = this->points_cloud.points[0].x, maxx = minx, miny = this->points_cloud.points[0].y, maxy = miny, minz = this->points_cloud.points[0].z, maxz = minz;
 	//for (vector<pcl::PointXYZ>::iterator it = this->points_cloud->begin(); it != this->points_cloud->end(); it++)
-	for(int i=0;i<this->points_cloud->points.size();i++)
+	for(int i=0;i<this->points_cloud.points.size();i++)
 	{
-		minx = min(minx, (double)this->points_cloud->points.at(i).x);
-		maxx = max(maxx, (double)this->points_cloud->points.at(i).x);
-		miny = min(miny, (double)this->points_cloud->points.at(i).y);
-		maxy = max(maxy, (double)this->points_cloud->points.at(i).y);
-		minz = min(minz, (double)this->points_cloud->points.at(i).z);
-		maxz = max(maxz, (double)this->points_cloud->points.at(i).z);
+		minx = min(minx, (double)this->points_cloud.points.at(i).x);
+		maxx = max(maxx, (double)this->points_cloud.points.at(i).x);
+		miny = min(miny, (double)this->points_cloud.points.at(i).y);
+		maxy = max(maxy, (double)this->points_cloud.points.at(i).y);
+		minz = min(minz, (double)this->points_cloud.points.at(i).z);
+		maxz = max(maxz, (double)this->points_cloud.points.at(i).z);
 	}
 	cv::Mat normal_image = cv::Mat::zeros((int)(maxx - minx + 1), (int)(maxy - miny + 1), CV_8UC3);
 #pragma omp parallel for
@@ -131,9 +131,9 @@ void CalcNormal::convertPointXYZ2Normal() {
 			pcNormal->points[i].normal_y *= -1;
 			pcNormal->points[i].normal_z *= -1;
 		}
-		normal_image.at<cv::Vec3b>((int)(this->points_cloud->points[i].x - minx), (int)(this->points_cloud->points[i].y - miny))[2] = (int)((pcNormal->points[i].normal_x + 1) * 128 - 1);
-		normal_image.at<cv::Vec3b>((int)(this->points_cloud->points[i].x - minx), (int)(this->points_cloud->points[i].y - miny))[1] = (int)((pcNormal->points[i].normal_y + 1) * 128 - 1);
-		normal_image.at<cv::Vec3b>((int)(this->points_cloud->points[i].x - minx), (int)(this->points_cloud->points[i].y - miny))[0] = (int)((pcNormal->points[i].normal_z + 1) * 128 - 1);
+		normal_image.at<cv::Vec3b>((int)(this->points_cloud.points[i].x - minx), (int)(this->points_cloud.points[i].y - miny))[2] = (int)((pcNormal->points[i].normal_x + 1) * 128 - 1);
+		normal_image.at<cv::Vec3b>((int)(this->points_cloud.points[i].x - minx), (int)(this->points_cloud.points[i].y - miny))[1] = (int)((pcNormal->points[i].normal_y + 1) * 128 - 1);
+		normal_image.at<cv::Vec3b>((int)(this->points_cloud.points[i].x - minx), (int)(this->points_cloud.points[i].y - miny))[0] = (int)((pcNormal->points[i].normal_z + 1) * 128 - 1);
 	}
 	cv::medianBlur(normal_image,normal_image,3);
 

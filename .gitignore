@@ -10,3 +10,4 @@ result
 build
 test_fold=1
 bin
+test_kinfu.cpp

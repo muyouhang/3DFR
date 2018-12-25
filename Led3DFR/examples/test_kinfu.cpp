@@ -20,6 +20,8 @@ int main() {
 	return 0;
 }
 void process_lock3dface() {
+	ofstream log_file("log.txt");
+
 	BasicFuncation BF;
 	ImageProcess IP;
 	KinectFusion KF; KF.Init(cv::Size(256, 256));
@@ -31,38 +33,52 @@ void process_lock3dface() {
 	string label;
 	string save_path = "E:/Dataset/Lock3DFace_/";
 	cv::Mat mask(cv::Size(256, 256), CV_16UC1);
+	int count = 0;
+	int unused = 0;
 	while (getline(depth_label, label)) {
-		std::cout << label << std::endl;
+		
+		std::cout << count++<<"  "<<label << std::endl;
 		std::vector<string> sp = BF.split(label,",");
-		if (_access((save_path + "depth/" + sp.at(0)).data(), 0) == -1) {
-			_mkdir((save_path + "depth/"+sp.at(0).data()).data());
-		}
-		if (_access((save_path + "depth_kinfu/" + sp.at(0)).data(), 0) == -1) {
-			_mkdir((save_path + "depth_kinfu/" + sp.at(0).data()).data());
-		}
-		if (_access((save_path + "normal/" + sp.at(0)).data(), 0) == -1) {
-			_mkdir((save_path + "normal/" + sp.at(0).data()).data());
-		}
-		if (_access((save_path + "normal_kinfu/" + sp.at(0)).data(), 0) == -1) {
-			_mkdir((save_path + "normal_kinfu/" + sp.at(0).data()).data());
+		log_file << count-1 << "  " << sp.at(0) << std::endl;
+		if (label.find("NU") != label.npos || label.find("FE") != label.npos) {
+			if (_access((save_path + "depth/" + sp.at(0)).data(), 0) == -1) {
+				_mkdir((save_path + "depth/" + sp.at(0).data()).data());
+			}
+			if (_access((save_path + "depth_kinfu/" + sp.at(0)).data(), 0) == -1) {
+				_mkdir((save_path + "depth_kinfu/" + sp.at(0).data()).data());
+			}
+			if (_access((save_path + "normal/" + sp.at(0)).data(), 0) == -1) {
+				_mkdir((save_path + "normal/" + sp.at(0).data()).data());
+			}
+			if (_access((save_path + "normal_kinfu/" + sp.at(0)).data(), 0) == -1) {
+				_mkdir((save_path + "normal_kinfu/" + sp.at(0).data()).data());
+			}
 		}
 		for (int i = 0; i < BF.str2int(sp.at(1)); i++) {
+			
 			char index[2];		sprintf(index, "%02d", i);
 			getline(depth_data, line);
+			if (unused > 0) continue;
+			if (label.find("PS")!=label.npos || label.find("OC") != label.npos) continue;
 			std::vector<string> raw_data = BF.split(line, " ");
 			cv::Mat depth_image(cv::Size(180, 180), CV_16UC1);
 			unsigned short *p;
-			for (int i = 0; i < 180; i++)
+			for (int ii = 0; ii < 180; ii++)
 			{
-				p = depth_image.ptr<uint16_t >(i);
+				p = depth_image.ptr<uint16_t >(ii);
 				for (int j = 0; j < 180; ++j) {
-					p[j] = BF.str2int(raw_data.at(i * 180 + j));
+					p[j] = BF.str2int(raw_data.at(ii * 180 + j));
 				}
 			}
 			cv::transpose(depth_image, depth_image);
 			depth_image.copyTo(mask(cv::Rect(38, 38, 180, 180)));
+			//cv::Mat cropped_depth = mask;
 			cv::Mat cropped_depth = IP.cropDepthFace(mask);
-
+			if (cropped_depth.empty()) continue;
+			//cv::Mat cvt;
+			//cv::convertScaleAbs(cropped_depth, cvt, 0.25*256. / 1000);
+			//cv::imshow("depth_map",cvt);
+			//cv::waitKey(0);
 			KinectFusion KF_temp;
 			KF_temp.Init(cv::Size(256, 256));
 			if(!KF_temp.Update(cropped_depth)) continue;
@@ -70,6 +86,8 @@ void process_lock3dface() {
 
 			std::vector<std::vector<float>> points = KF.GetPoints();
 			std::vector<std::vector<float>> points_temp = KF_temp.GetPoints();
+
+
 			CalcNormal CN_temp;
 			CalcNormal CN;
 
@@ -105,6 +123,8 @@ void process_lock3dface() {
 			t_depth_kinfu.wait();
 			t_normal_kinfu.wait();
 		}
+		unused--;
+		KF.Reset();
 	}
 }
 void test_kinfu() {

@@ -147,30 +147,33 @@ cv::Mat ImageProcess::cropDepthFace(cv::Mat depth_face) {
 	sort(ntp_area.begin(), ntp_area.end());
 	int ntp_value = 0;
 	int __sum = 0;
-	for (int i = 200; i < 300; i++) {
+	for (int i = 300; i < 400; i++) {
 		__sum += ntp_area.at(i);
 	}
 	ntp_value = __sum / 100;
 	//然后裁剪人脸
 	int __min = 9999;
 	int __max = 0;
+	int count = 0;//计算有效点数
 	for (int i = 0; i < nRows; i++)
 	{
 		vector<int> line;
 		p = depth_face.ptr<uint16_t >(i);//获取每行首地址
 		for (int j = 0; j < nCols; ++j)
 		{
-			if ((ntp.x-i)*(ntp.x - i) + (ntp.y - j)*(ntp.y - j) + (p[j] - ntp_value)*(p[j]-ntp_value) > 70 * 70) {
+			if ((ntp.x-i)*(ntp.x - i) + (ntp.y - j)*(ntp.y - j) + (p[j] - ntp_value)*(p[j]-ntp_value) > 60 * 60) {
 				p[j] = 0;
 			}
 			else {
 				if (__min >= p[j]) __min = p[j];
 				if (__max <= p[j]) __max = p[j];
 				p[j] = 2*ntp_value-p[j];
+				count++;
 			}
 		}
 	}
-	return depth_face;
+	if(count>1000)	return depth_face;
+	else return cv::Mat();
 }
 cv::Mat ImageProcess::resize(cv::Mat inputImage, cv::Size size) {
 	int s;

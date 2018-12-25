@@ -25,13 +25,13 @@ public:
 	void SetPoints(std::vector<std::vector<float>> points);
 	cv::Mat GetDepth();
 	cv::Mat GetNormal();
-	pcl::PointCloud<pcl::PointXYZ>::Ptr GetPoints();
+	pcl::PointCloud<pcl::PointXYZ> GetPoints();
 	//void ShowPoints();
 private:
 	cv::Mat depth_image;
 	cv::Mat normal_image;
 	std::vector<std::vector<float>> points;
-	pcl::PointCloud<pcl::PointXYZ>::Ptr points_cloud;
+	pcl::PointCloud<pcl::PointXYZ> points_cloud;
 
 	void convertPoints2PointXYZ();
 	void convertPointXYZ2Depth();

@@ -17,6 +17,11 @@ void KinectFusion::Init(cv::Size frame_size) {
 		0, 256.f, 128.f,
 		0, 0, 1
 	);
+	//params->intr = cv::Matx33f(
+	//	366.1f, 0, 128.f,
+	//	0, 366.1f, 128.f,
+	//	0, 0, 1
+	//);
 	params->depthFactor = 1000;
 
 	params->bilateral_sigma_depth = 0.04f;
