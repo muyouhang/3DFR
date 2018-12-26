@@ -22,6 +22,7 @@ class CalcNormal {
 
 public:
 	CalcNormal();
+	void SetNormal(std::vector<std::vector<float>> normals);
 	void SetPoints(std::vector<std::vector<float>> points);
 	cv::Mat GetDepth();
 	cv::Mat GetNormal();
@@ -32,6 +33,7 @@ private:
 	cv::Mat normal_image;
 	std::vector<std::vector<float>> points;
 	pcl::PointCloud<pcl::PointXYZ> points_cloud;
+	pcl::PointCloud<pcl::Normal> points_normal;
 
 	void convertPoints2PointXYZ();
 	void convertPointXYZ2Depth();

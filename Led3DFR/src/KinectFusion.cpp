@@ -74,11 +74,10 @@ std::vector<std::vector<float>> KinectFusion::GetPoints() {
 		point_cloud.push_back(std::vector<float>{
 			points.ptr<cv::Vec4f>(0, 0)[r][0],
 			points.ptr<cv::Vec4f>(0, 0)[r][1],
-			points.ptr<cv::Vec4f>(0, 0)[r][2]
+			points.ptr<cv::Vec4f>(0, 0)[r][2]*(-1)
 		});
 	}
 	return point_cloud;
-	//cout << points.ptr<cv::Vec4f>(0, 0)[0][0] << "," << points.ptr<cv::Vec4f>(0, 0)[1] << "," << points.ptr<cv::Vec4f>(0, 0)[2] << "," << points.ptr<cv::Vec4f>(0, 0)[3] << endl;;
 }
 
 cv::Mat KinectFusion::GetRender() {

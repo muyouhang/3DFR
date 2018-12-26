@@ -151,6 +151,11 @@ cv::Mat ImageProcess::cropDepthFace(cv::Mat depth_face) {
 		__sum += ntp_area.at(i);
 	}
 	ntp_value = __sum / 100;
+
+	//阈值分割法
+
+
+
 	//然后裁剪人脸
 	int __min = 9999;
 	int __max = 0;
@@ -192,4 +197,24 @@ cv::Mat ImageProcess::resize(cv::Mat inputImage, cv::Size size) {
 	addWeighted(image_temp_ep_roi, 0., inputImage, 1.0, 0., image_temp_ep_roi);
 	cv::resize(image_temp_ep, dstNormImg, size, 0, 0, 1);    //大小归一化
 	return dstNormImg;
+}
+cv::Mat ImageProcess::segmentDepthFace(cv::Mat depth_face) {
+	cv::Mat cvt;
+	cv::Mat dst;
+	cv::Mat gray;
+
+	cv::convertScaleAbs(depth_face, cvt, 0.25*256. / 1000);
+	cvt.convertTo(gray, CV_8UC1);
+
+	cv::threshold(gray,dst,0,255,cv::THRESH_OTSU);
+	cv::bitwise_not(dst,dst);
+
+	uint16_t *f;
+	uint8_t *b;
+	for (int i = 0; i < depth_face.rows; i++) {
+		f = depth_face.ptr<uint16_t >(i);//获取每行首地址
+		b = dst.ptr<uint8_t>(i);
+		for (int j = 0; j < depth_face.cols; j++) {	if (b[j] == 0) {f[j] = 0; }	}
+	}
+	return depth_face;
 }
