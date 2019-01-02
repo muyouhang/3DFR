@@ -28,9 +28,8 @@ void CalcNormal::convertPoints2PointXYZ() {
 		this->points_cloud.points.push_back(point);
 	}
 	//
-	//this->deOutlier(50, 1);
-
-	this->upsample(5, 3, 1.5);
+	//this->deOutlier(50, 0.8);
+	this->upsample(3, 3, 1.5);
 }
 void CalcNormal::deOutlier(int neighbour, double dev)
 {

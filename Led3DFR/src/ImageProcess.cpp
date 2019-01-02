@@ -128,6 +128,7 @@ cv::Mat ImageProcess::normalizeInfrared(cv::Mat image) {
 	return new_infrared;
 }
 cv::Mat ImageProcess::cropDepthFace(cv::Mat depth_face) {
+	depth_face=segmentDepthFace(depth_face);
 	cv::Point ntp(depth_face.rows/2,depth_face.cols/2);
 	std::vector<std::vector<int>> face_points;
 	int nRows = depth_face.rows;
@@ -152,10 +153,6 @@ cv::Mat ImageProcess::cropDepthFace(cv::Mat depth_face) {
 	}
 	ntp_value = __sum / 100;
 
-	//阈值分割法
-
-
-
 	//然后裁剪人脸
 	int __min = 9999;
 	int __max = 0;
@@ -166,13 +163,13 @@ cv::Mat ImageProcess::cropDepthFace(cv::Mat depth_face) {
 		p = depth_face.ptr<uint16_t >(i);//获取每行首地址
 		for (int j = 0; j < nCols; ++j)
 		{
-			if ((ntp.x-i)*(ntp.x - i) + (ntp.y - j)*(ntp.y - j) + (p[j] - ntp_value)*(p[j]-ntp_value) > 60 * 60) {
+			if ((ntp.x-i)*(ntp.x - i) + (ntp.y - j)*(ntp.y - j) + (p[j] - ntp_value)*(p[j]-ntp_value) > 70 * 70) {
 				p[j] = 0;
 			}
 			else {
 				if (__min >= p[j]) __min = p[j];
 				if (__max <= p[j]) __max = p[j];
-				p[j] = 2*ntp_value-p[j];
+				//p[j] = 2*ntp_value-p[j];
 				count++;
 			}
 		}
@@ -207,14 +204,114 @@ cv::Mat ImageProcess::segmentDepthFace(cv::Mat depth_face) {
 	cvt.convertTo(gray, CV_8UC1);
 
 	cv::threshold(gray,dst,0,255,cv::THRESH_OTSU);
-	cv::bitwise_not(dst,dst);
-
+	//cv::threshold(gray, dst, 0, 255.0, cv::THRESH_BINARY);
+	//cv::bitwise_not(dst,dst);
+	cv::Mat mask=cv::Mat::zeros(gray.rows,gray.cols,CV_8UC1);
+	std::vector<vector<cv::Point>> contours;
+	cv::findContours(dst,contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
+	
+	std::vector<vector<cv::Point>> contours_temp;
+	if(contours.size()>1)	contours_temp.push_back(contours.at(0));
+	else { return depth_face; }
+	for (int i = 1; i < contours.size(); i++) {
+		if (contours_temp[0].size() < contours.at(i).size()) {
+			contours_temp[0] = contours.at(i);
+		}
+	}
+	cv::drawContours(mask, { contours_temp }, -1, cv::Scalar(255, 255, 255), cv::FILLED, 8);
+	//cv::imshow("cvt",cvt);
+	cv::imshow("mask",mask);
+	cv::waitKey(5);
 	uint16_t *f;
 	uint8_t *b;
 	for (int i = 0; i < depth_face.rows; i++) {
 		f = depth_face.ptr<uint16_t >(i);//获取每行首地址
-		b = dst.ptr<uint8_t>(i);
+		b = mask.ptr<uint8_t>(i);
 		for (int j = 0; j < depth_face.cols; j++) {	if (b[j] == 0) {f[j] = 0; }	}
 	}
 	return depth_face;
+}
+cv::Mat ImageProcess::deNoise(cv::Mat image) {
+	cv::Mat dst;
+	cv::Mat gray;
+
+	cv::threshold(gray, dst, 0, 255.0, cv::THRESH_BINARY);
+	cv::Mat mask = cv::Mat::zeros(gray.rows, gray.cols, CV_8UC1);
+	std::vector<vector<cv::Point>> contours;
+	cv::findContours(dst, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
+
+	std::vector<vector<cv::Point>> contours_temp;
+	if (contours.size()>0)	contours_temp.push_back(contours.at(0));
+	for (int i = 0; i < contours.size(); i++) {
+		if (contours_temp.size() < contours.at(i).size()) {
+			contours_temp[0] = contours.at(i);
+		}
+	}
+	cv::drawContours(mask, { contours_temp }, -1, cv::Scalar(255, 255, 255), cv::FILLED, 8);
+	uint16_t *f;
+	uint8_t *b;
+	for (int i = 0; i < image.rows; i++) {
+		f = image.ptr<uint16_t >(i);//获取每行首地址
+		b = mask.ptr<uint8_t>(i);
+		for (int j = 0; j < image.cols; j++) { if (b[j] == 0) { f[j] = 0; } }
+	}
+	return image;
+}
+int ImageProcess::computeNTP(cv::Mat image) {
+	cv::Point ntp(image.rows / 2, image.cols / 2);
+	std::vector<std::vector<int>> face_points;
+	int nRows = image.rows;
+	int nCols = image.cols;
+	vector<vector<int>> pixels;
+	unsigned short *p;
+	//首先计算鼻尖点的估计值
+	std::vector<int> ntp_area;
+	for (int i = ntp.x - 10; i < ntp.x + 10; i++)
+	{
+		p = image.ptr<uint16_t >(i);//获取每行首地址
+		for (int j = ntp.y - 10; j < ntp.y + 10; ++j)
+		{
+			if (p[j] >1300 || p[j] < 500) {
+				continue;
+			}
+			ntp_area.push_back(p[j]);
+		}
+	}
+	sort(ntp_area.begin(), ntp_area.end());
+	int ntp_value = -1;
+	int __sum = 0;
+	for (int i = 0; i < ntp_area.size(); i++) {
+		__sum += ntp_area.at(i);
+	}
+	if (ntp_area.size() > 0) {
+		ntp_value = __sum / ntp_area.size();
+	}
+	return ntp_value;
+}
+cv::Mat ImageProcess::crop3DFace(int ntp_value, cv::Mat image) {
+	int basic_radius = 70;
+	float basic_ntp_value = 600.0;
+	int radius = basic_radius;
+	if (ntp_value != -1) {
+		radius = basic_radius*(basic_ntp_value / ntp_value);
+	}
+	int count = 0;//计算有效点数
+	unsigned short *p;
+	cv::Point ntp(image.rows / 2, image.cols / 2);
+	for (int i = 0; i < image.rows; i++)
+	{
+		vector<int> line;
+		p = image.ptr<uint16_t >(i);//获取每行首地址
+		for (int j = 0; j < image.cols; ++j)
+		{
+			if ((ntp.x - i)*(ntp.x - i) + (ntp.y - j)*(ntp.y - j) + (p[j] - ntp_value)*(p[j] - ntp_value) > radius * radius) 	p[j] = 0;
+			else count++;
+		}
+	}
+	
+	if (count > 1000) {
+		image = segmentDepthFace(image);
+		return image;
+	}
+	else return cv::Mat();
 }

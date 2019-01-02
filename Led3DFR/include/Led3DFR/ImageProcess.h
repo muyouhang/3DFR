@@ -29,9 +29,12 @@ public:
 	cv::Mat getInfraredImage();
 	cv::Mat getColorImage();
 
+	int computeNTP(cv::Mat image);
+	cv::Mat crop3DFace(int ntp_value,cv::Mat image);
 	cv::Mat normalizeInfrared(cv::Mat image);
 	cv::Mat segmentDepthFace(cv::Mat depth_face);
 	cv::Mat cropDepthFace(cv::Mat depth_face);
 	cv::Mat ImageProcess::resize(cv::Mat inputImage, cv::Size size);
+	cv::Mat deNoise(cv::Mat image);
 };
 
