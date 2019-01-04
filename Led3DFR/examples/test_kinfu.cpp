@@ -25,8 +25,17 @@ void process_lock3dface() {
 	ImageProcess IP;
 	KinectFusion KF; KF.Init(cv::Size(256, 256));
 
-	ifstream depth_data("E:/Dataset/lock3dface/DATA/kinect2_all.dat");
-	ifstream depth_label("E:/Dataset/lock3dface/DATA/kinect2_all.name");
+	ifstream depth_data("E:/Dataset/lock3dface/DATA/kinect_all.dat");
+	ifstream depth_label("E:/Dataset/lock3dface/DATA/kinect_all.name");
+	ifstream error_data("E:/Dataset/Lock3DFace_face/error_video_depth.txt");
+
+	std::vector<string> error_videos;
+	while (!error_data.eof()) {
+		string line;
+		getline(error_data,line);
+		std::vector<string> sp = BF.split(line," ");
+		if(sp.size()>0)	error_videos.push_back(sp.at(0));
+	}
 
 	string line;
 	string label;
@@ -48,18 +57,13 @@ void process_lock3dface() {
 			if (_access((save_path + "depth_kinfu/" + sp.at(0)).data(), 0) == -1) {
 				_mkdir((save_path + "depth_kinfu/" + sp.at(0).data()).data());
 			}
-			//if (_access((save_path + "normal/" + sp.at(0)).data(), 0) == -1) {
-			//	_mkdir((save_path + "normal/" + sp.at(0).data()).data());
-			//}
-			//if (_access((save_path + "normal_kinfu/" + sp.at(0)).data(), 0) == -1) {
-			//	_mkdir((save_path + "normal_kinfu/" + sp.at(0).data()).data());
-			//}
 		int nose_tip_value = -1;
 		for (int i = 0; i < BF.str2int(sp.at(1)); i++) {
 			if (i % 10 == 0) KF.Reset();
 			char index[2];		sprintf(index, "%02d", i);
 			getline(depth_data, line);
 			if (unused > 0) continue;
+			if(std::count(error_videos.begin(),error_videos.end(),sp[0])==0) continue;
 			//if (i > 0) continue;
 
 			std::vector<string> raw_data = BF.split(line, " ");
@@ -74,7 +78,7 @@ void process_lock3dface() {
 			}
 			cv::transpose(depth_image, depth_image);
 			if (nose_tip_value == -1) {
-				nose_tip_value = IP.computeNTP(depth_image.clone());
+				nose_tip_value = IP.computeNTP(depth_image.clone(),400,900);
 				std::cout << nose_tip_value << std::endl;
 			}
 			if (nose_tip_value == -1) continue;

@@ -209,13 +209,18 @@ cv::Mat ImageProcess::segmentDepthFace(cv::Mat depth_face) {
 	cv::Mat mask=cv::Mat::zeros(gray.rows,gray.cols,CV_8UC1);
 	std::vector<vector<cv::Point>> contours;
 	cv::findContours(dst,contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
-	
+	float area = 0.0;
 	std::vector<vector<cv::Point>> contours_temp;
-	if(contours.size()>1)	contours_temp.push_back(contours.at(0));
+	if (contours.size() > 1) {
+		contours_temp.push_back(contours.at(0));
+		area = cv::contourArea(contours.at(0));
+	}
 	else { return depth_face; }
 	for (int i = 1; i < contours.size(); i++) {
-		if (contours_temp[0].size() < contours.at(i).size()) {
+		float area_temp = cv::contourArea(contours.at(i));
+		if (area < area_temp) {
 			contours_temp[0] = contours.at(i);
+			area = area_temp;
 		}
 	}
 	cv::drawContours(mask, { contours_temp }, -1, cv::Scalar(255, 255, 255), cv::FILLED, 8);
@@ -257,6 +262,7 @@ cv::Mat ImageProcess::deNoise(cv::Mat image) {
 	}
 	return image;
 }
+
 int ImageProcess::computeNTP(cv::Mat image) {
 	cv::Point ntp(image.rows / 2, image.cols / 2);
 	std::vector<std::vector<int>> face_points;
@@ -271,7 +277,7 @@ int ImageProcess::computeNTP(cv::Mat image) {
 		p = image.ptr<uint16_t >(i);//获取每行首地址
 		for (int j = ntp.y - 10; j < ntp.y + 10; ++j)
 		{
-			if (p[j] >1300 || p[j] < 500) {
+			if (p[j] >1320 || p[j] < 500) {
 				continue;
 			}
 			ntp_area.push_back(p[j]);
@@ -279,13 +285,40 @@ int ImageProcess::computeNTP(cv::Mat image) {
 	}
 	sort(ntp_area.begin(), ntp_area.end());
 	int ntp_value = -1;
-	int __sum = 0;
-	for (int i = 0; i < ntp_area.size(); i++) {
-		__sum += ntp_area.at(i);
-	}
 	if (ntp_area.size() > 0) {
-		ntp_value = __sum / ntp_area.size();
+		double sum = std::accumulate(std::begin(ntp_area),std::end(ntp_area),0.0);
+		ntp_value = sum / ntp_area.size();
 	}
+	if (ntp_value > 1320 || ntp_value < 500) { ntp_value = -1; }
+	return ntp_value;
+}
+int ImageProcess::computeNTP(cv::Mat image, int min , int max ) {
+	cv::Point ntp(image.rows / 2, image.cols / 2);
+	std::vector<std::vector<int>> face_points;
+	int nRows = image.rows;
+	int nCols = image.cols;
+	vector<vector<int>> pixels;
+	unsigned short *p;
+	//首先计算鼻尖点的估计值
+	std::vector<int> ntp_area;
+	for (int i = ntp.x - 10; i < ntp.x + 10; i++)
+	{
+		p = image.ptr<uint16_t >(i);//获取每行首地址
+		for (int j = ntp.y - 10; j < ntp.y + 10; ++j)
+		{
+			if (p[j] >max || p[j] < min) {
+				continue;
+			}
+			ntp_area.push_back(p[j]);
+		}
+	}
+	sort(ntp_area.begin(), ntp_area.end());
+	int ntp_value = -1;
+	if (ntp_area.size() > 0) {
+		double sum = std::accumulate(std::begin(ntp_area), std::end(ntp_area), 0.0);
+		ntp_value = sum / ntp_area.size();
+	}
+	if (ntp_value > max || ntp_value < min) { ntp_value = -1; }
 	return ntp_value;
 }
 cv::Mat ImageProcess::crop3DFace(int ntp_value, cv::Mat image) {
