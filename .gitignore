@@ -10,3 +10,4 @@ result
 build
 bin
 *.jpg
+data/test_fold=1/
