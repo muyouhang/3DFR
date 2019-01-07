@@ -10,4 +10,4 @@ result
 build
 bin
 *.jpg
-data/test_fold=1/
+Led3DFR/data/test_fold=1/
