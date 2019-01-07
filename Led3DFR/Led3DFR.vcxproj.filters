@@ -42,7 +42,7 @@
     <ClCompile Include="src\KinectFusion.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="examples\test_kinfu.cpp">
+    <ClCompile Include="examples\process_lock3dface_dataset.cpp">
       <Filter>examples</Filter>
     </ClCompile>
   </ItemGroup>
