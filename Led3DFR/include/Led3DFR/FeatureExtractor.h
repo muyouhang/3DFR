@@ -25,6 +25,8 @@ public:
 	FeatureExtractor();
 	int LoadModel(string net_name,string epoch, string layer_name);
 	std::vector<double> Extract(string image_name);
+	std::vector<double> Extract(cv::Mat image);
+
 	~FeatureExtractor();
 };
 

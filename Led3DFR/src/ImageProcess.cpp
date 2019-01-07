@@ -224,9 +224,8 @@ cv::Mat ImageProcess::segmentDepthFace(cv::Mat depth_face) {
 		}
 	}
 	cv::drawContours(mask, { contours_temp }, -1, cv::Scalar(255, 255, 255), cv::FILLED, 8);
-	//cv::imshow("cvt",cvt);
+	cv::imshow("cvt",cvt);
 	cv::imshow("mask",mask);
-	cv::waitKey(5);
 	uint16_t *f;
 	uint8_t *b;
 	for (int i = 0; i < depth_face.rows; i++) {
@@ -292,7 +291,7 @@ int ImageProcess::computeNTP(cv::Mat image) {
 	if (ntp_value > 1320 || ntp_value < 500) { ntp_value = -1; }
 	return ntp_value;
 }
-int ImageProcess::computeNTP(cv::Mat image, int min , int max ) {
+int ImageProcess::computeNTP(cv::Mat image, int min , int max , int edge) {
 	cv::Point ntp(image.rows / 2, image.cols / 2);
 	std::vector<std::vector<int>> face_points;
 	int nRows = image.rows;
@@ -301,10 +300,10 @@ int ImageProcess::computeNTP(cv::Mat image, int min , int max ) {
 	unsigned short *p;
 	//首先计算鼻尖点的估计值
 	std::vector<int> ntp_area;
-	for (int i = ntp.x - 10; i < ntp.x + 10; i++)
+	for (int i = ntp.x - edge; i < ntp.x + edge; i++)
 	{
 		p = image.ptr<uint16_t >(i);//获取每行首地址
-		for (int j = ntp.y - 10; j < ntp.y + 10; ++j)
+		for (int j = ntp.y - edge; j < ntp.y + edge; ++j)
 		{
 			if (p[j] >max || p[j] < min) {
 				continue;
@@ -322,6 +321,10 @@ int ImageProcess::computeNTP(cv::Mat image, int min , int max ) {
 	return ntp_value;
 }
 cv::Mat ImageProcess::crop3DFace(int ntp_value, cv::Mat image) {
+	cv::Mat cvt;
+	cv::convertScaleAbs(image, cvt, 0.25*256. / 1000);
+	cv::imshow("depth",cvt);
+	
 	int basic_radius = 70;
 	float basic_ntp_value = 600.0;
 	int radius = basic_radius;
@@ -342,7 +345,7 @@ cv::Mat ImageProcess::crop3DFace(int ntp_value, cv::Mat image) {
 		}
 	}
 	
-	if (count > 1000) {
+	if (count > 100) {
 		image = segmentDepthFace(image);
 		return image;
 	}

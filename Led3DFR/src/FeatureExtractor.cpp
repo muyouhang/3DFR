@@ -56,6 +56,19 @@ void FeatureExtractor::LoadParamtes(string model_name) {
 	/*WaitAll is need when we copy data between GPU and the main memory*/
 	NDArray::WaitAll();
 }
+std::vector<double> FeatureExtractor::Extract(cv::Mat image) {
+	NDArray data = Mat2NDArray(image);
+	data.CopyTo(&args_map["data"]);
+	executor->Forward(false);
+	auto array = executor->outputs[0].Copy(ctx_cpu);
+	NDArray::WaitAll();
+
+	std::vector<double> feature;
+	for (int i = 0; i < array.Size(); i++) {
+		feature.push_back(array.At(0, i));
+	}
+	return feature;
+}
 std::vector<double> FeatureExtractor::Extract(string image_name) {
 	cv::Mat image = cv::imread(image_name);
 

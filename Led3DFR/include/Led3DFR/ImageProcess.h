@@ -31,7 +31,7 @@ public:
 	cv::Mat getColorImage();
 
 	int computeNTP(cv::Mat image);
-	int computeNTP(cv::Mat image,int min=500,int max = 800);
+	int computeNTP(cv::Mat image,int min=500,int max = 800, int edge=10);
 
 	cv::Mat crop3DFace(int ntp_value,cv::Mat image);
 	cv::Mat normalizeInfrared(cv::Mat image);
