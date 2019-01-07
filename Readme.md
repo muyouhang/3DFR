@@ -14,3 +14,12 @@ This project is used for 3D face recognition,
 ## Ubuntu
 
 # 4. Quick Start
+> cd 3DFR/Led3DFR/data  
+> unzip test_fold=1.zip  
+> cd ..  
+> mkdir build  
+> cd build  
+> cmake ..  
+> make  
+> cd ..  
+> ./bin/test_kinfu
