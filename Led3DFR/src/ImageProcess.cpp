@@ -224,8 +224,8 @@ cv::Mat ImageProcess::segmentDepthFace(cv::Mat depth_face) {
 		}
 	}
 	cv::drawContours(mask, { contours_temp }, -1, cv::Scalar(255, 255, 255), cv::FILLED, 8);
-	cv::imshow("cvt",cvt);
-	cv::imshow("mask",mask);
+	//cv::imshow("cvt",cvt);
+	//cv::imshow("mask",mask);
 	uint16_t *f;
 	uint8_t *b;
 	for (int i = 0; i < depth_face.rows; i++) {
@@ -313,19 +313,20 @@ int ImageProcess::computeNTP(cv::Mat image, int min , int max , int edge) {
 	}
 	sort(ntp_area.begin(), ntp_area.end());
 	int ntp_value = -1;
-	if (ntp_area.size() > 0) {
-		double sum = std::accumulate(std::begin(ntp_area), std::end(ntp_area), 0.0);
-		ntp_value = sum / ntp_area.size();
+	if (ntp_area.size() > 4) {
+		int used_points = ntp_area.size() * 3 / 4;
+		double sum = std::accumulate(ntp_area.begin() , ntp_area.begin()+used_points, 0.0);
+		ntp_value = sum / used_points;
 	}
 	if (ntp_value > max || ntp_value < min) { ntp_value = -1; }
 	return ntp_value;
 }
 cv::Mat ImageProcess::crop3DFace(int ntp_value, cv::Mat image) {
-	cv::Mat cvt;
-	cv::convertScaleAbs(image, cvt, 0.25*256. / 1000);
-	cv::imshow("depth",cvt);
+	//cv::Mat cvt;
+	//cv::convertScaleAbs(image, cvt, 0.25*256. / 1000);
+	//cv::imshow("depth",cvt);
 	
-	int basic_radius = 70;
+	int basic_radius = 80;
 	float basic_ntp_value = 600.0;
 	int radius = basic_radius;
 	if (ntp_value != -1) {
@@ -350,4 +351,39 @@ cv::Mat ImageProcess::crop3DFace(int ntp_value, cv::Mat image) {
 		return image;
 	}
 	else return cv::Mat();
+}
+std::pair<cv::Mat, float> ImageProcess::computeAdaptiveThreshold(cv::Mat image) {
+	cv::Mat cvt;
+	cv::Mat dst;
+	cv::Mat gray;
+
+	cv::convertScaleAbs(image, cvt, 0.25*256. / 1000);
+	cvt.convertTo(gray, CV_8UC1);
+
+	float thr = cv::threshold(gray, dst, 0, 255, cv::THRESH_OTSU);
+	cv::bitwise_not(dst, dst);
+	uint16_t *f;
+	uint8_t *b;
+	for (int i = 0; i < image.rows; i++) {
+		f = image.ptr<uint16_t >(i);//获取每行首地址
+		b = dst.ptr<uint8_t>(i);
+		for (int j = 0; j < image.cols; j++) { if (b[j] == 0) { f[j] = 0; } }
+	}
+	//std::cout << "ostu = " << thr / (0.25*256. / 1000) << std::endl;
+	//cv::imshow("face",gray);
+	//cv::waitKey(33);
+	return std::make_pair(image,thr / (0.25*256. / 1000));
+}
+std::vector<std::vector<int>> ImageProcess::transDepth2Points(cv::Mat image) {
+	std::vector<std::vector<int>> points;
+	uint16_t *p;
+	for (int i = 0; i < image.rows; i++) {
+		p = image.ptr<uint16_t >(i);
+		for (int j = 0; j < image.cols; j++) { 
+			if (p[j] > 0) { 
+				points.push_back({j,i,p[j]});
+			} 
+		}
+	}
+	return points;
 }

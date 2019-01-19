@@ -39,5 +39,8 @@ public:
 	cv::Mat cropDepthFace(cv::Mat depth_face);
 	cv::Mat ImageProcess::resize(cv::Mat inputImage, cv::Size size);
 	cv::Mat deNoise(cv::Mat image);
+
+	std::pair<cv::Mat,float> computeAdaptiveThreshold(cv::Mat image);
+	std::vector<std::vector<int>> transDepth2Points(cv::Mat image);
 };
 
