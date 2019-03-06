@@ -45,12 +45,12 @@ void lock3dface_save_obj(string data_name) {
 	BasicFuncation BF;
 	ImageProcess IP;
 
-	ifstream depth_data("E:/Dataset/lock3dface/DATA/"+ data_name+"_all.dat");
-	ifstream depth_label("E:/Dataset/lock3dface/DATA/" + data_name + "_all.name");
+	ifstream depth_data("E:/Dataset/lock3dface/DATA/"+ data_name+".dat");
+	ifstream depth_label("E:/Dataset/lock3dface/DATA/" + data_name + ".name");
 	ifstream error_data("E:/Dataset/Lock3DFace_face/code/obj_problem_video.txt");
 	float z_min = 400;
 	float z_max = 1000;
-	int base_ntp = 700;
+	int base_ntp = 600;
 	int search_ratio = 5;
 
 	std::vector<string> error_videos;
@@ -63,7 +63,7 @@ void lock3dface_save_obj(string data_name) {
 
 	string line;
 	string label;
-	string save_path = "E:/Dataset/Lock3DFace_obj_v2/";
+	string save_path = "E:/Dataset/Lock3DFace_obj/";
 	int count = 0;
 	int unused = 0;
 	//cout << "unused=";
@@ -83,7 +83,7 @@ void lock3dface_save_obj(string data_name) {
 		for (int i = 0; i < BF.str2int(sp.at(1)); i++) {
 			getline(depth_data, line);
 			if (unused > 0) continue;
-			if (std::count(error_videos.begin(), error_videos.end(), sp[0]) == 0) continue;
+			//if (std::count(error_videos.begin(), error_videos.end(), sp[0]) == 0) continue;
 			//if (i > 0) continue;
 
 			std::vector<string> raw_data = BF.split(line, " ");
@@ -105,6 +105,7 @@ void lock3dface_save_obj(string data_name) {
 			cv::Mat depth_image = depth_image_list.at(i);
 			std::pair<cv::Mat,float> td= IP.computeAdaptiveThreshold(depth_image);
 			depth_image = td.first;
+
 			z_max = td.second;
 			int nose_tip_value = IP.computeNTP(depth_image.clone(), z_min, z_max, search_ratio);
 			if (nose_tip_value == -1) {
@@ -122,6 +123,11 @@ void lock3dface_save_obj(string data_name) {
 				cropped_face = IP.crop3DFace(base_ntp, depth_image.clone());
 				if (cropped_face.empty()) {
 					std::cout << "error: cropped face empty ! ntp = " << nose_tip_value << std::endl;
+					//cv::Mat cvt;
+					//cv::convertScaleAbs(depth_image, cvt, 0.25*256. / 1000);
+					//cvt.convertTo(cvt, CV_8UC1);
+					//cv::imshow("depth",cvt);
+					//cv::waitKey(0);
 					continue;
 				}
 			}
@@ -169,8 +175,8 @@ void lock3dface_save_obj(string data_name) {
 	}
 }
 int main() {
-	lock3dface_save_obj("kinect");
-	lock3dface_save_obj("kinect2");
+	//lock3dface_save_obj("kinect");
+	lock3dface_save_obj("lock3dface_session2");
 	std::system("pause");
 
 	return 0;

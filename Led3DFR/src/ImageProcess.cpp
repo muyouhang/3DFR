@@ -202,10 +202,7 @@ cv::Mat ImageProcess::segmentDepthFace(cv::Mat depth_face) {
 
 	cv::convertScaleAbs(depth_face, cvt, 0.25*256. / 1000);
 	cvt.convertTo(gray, CV_8UC1);
-
-	cv::threshold(gray,dst,0,255,cv::THRESH_OTSU);
-	//cv::threshold(gray, dst, 0, 255.0, cv::THRESH_BINARY);
-	//cv::bitwise_not(dst,dst);
+	cv::threshold(gray, dst, 0, 255.0, cv::THRESH_BINARY);
 	cv::Mat mask=cv::Mat::zeros(gray.rows,gray.cols,CV_8UC1);
 	std::vector<vector<cv::Point>> contours;
 	cv::findContours(dst,contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
@@ -326,12 +323,13 @@ cv::Mat ImageProcess::crop3DFace(int ntp_value, cv::Mat image) {
 	//cv::convertScaleAbs(image, cvt, 0.25*256. / 1000);
 	//cv::imshow("depth",cvt);
 	
-	int basic_radius = 80;
+	int basic_radius = 70;
 	float basic_ntp_value = 600.0;
 	int radius = basic_radius;
 	if (ntp_value != -1) {
 		radius = basic_radius*(basic_ntp_value / ntp_value);
 	}
+process:
 	int count = 0;//计算有效点数
 	unsigned short *p;
 	cv::Point ntp(image.rows / 2, image.cols / 2);
@@ -350,6 +348,11 @@ cv::Mat ImageProcess::crop3DFace(int ntp_value, cv::Mat image) {
 		image = segmentDepthFace(image);
 		return image;
 	}
+	else if(count < 100 && radius-basic_radius*(basic_ntp_value / ntp_value)<=10){
+		radius += 5;
+		std::cout <<"radius:"<< radius << std::endl;
+		goto process;
+	}
 	else return cv::Mat();
 }
 std::pair<cv::Mat, float> ImageProcess::computeAdaptiveThreshold(cv::Mat image) {
@@ -361,7 +364,12 @@ std::pair<cv::Mat, float> ImageProcess::computeAdaptiveThreshold(cv::Mat image) 
 	cvt.convertTo(gray, CV_8UC1);
 
 	float thr = cv::threshold(gray, dst, 0, 255, cv::THRESH_OTSU);
+	//cv::bitwise_not(dst, dst);
+	//cv::imshow("OTSU",dst);
+	cv::threshold(gray, dst, thr, 255, cv::THRESH_BINARY);
 	cv::bitwise_not(dst, dst);
+	//cv::imshow("BINARY", dst);
+	//cv::waitKey(0);
 	uint16_t *f;
 	uint8_t *b;
 	for (int i = 0; i < image.rows; i++) {
