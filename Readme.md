@@ -1,5 +1,10 @@
 # 1. Introduction
-This project is used for 3D face recognition,
+The features we support include:
+-   Detect faces from infrared image
+-   Crop face from raw depth image
+-   Project 3D facial points to 2D depth face
+-   Estimate surface normal of 3D fcial points, and generate 2D normal face
+-   
 # 2. Workflow
 
 # 3. Installation
