@@ -23,3 +23,5 @@ This project is used for 3D face recognition,
 > make  
 > cd ..  
 > ./bin/test_kinfu
+# License
+3DFR is freely available for free non-commercial use. If you have any questions, please contact us **muyouhang@163.com**.
